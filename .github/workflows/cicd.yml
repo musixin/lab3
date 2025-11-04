@@ -7,8 +7,6 @@ on:
 jobs:
   test-and-package:
     runs-on: ubuntu-latest
-    env:
-      PYTEST_REPORT_PATH: /tmp/pytest_report.html
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
@@ -23,16 +21,15 @@ jobs:
 
       - name: "Run tests and code coverage analysis"
         run: |
-          mkdir -p ${{ env.PYTEST_REPORT_PATH }}
-          pytest --html=${{ env.PYTEST_REPORT_PATH }} --self-contained-html
+          mkdir -p test-results
+          pytest --html=test-results/report.html --self-contained-html
 
       - name: "Archive pytest reports"
         uses: actions/upload-artifact@v4
         if: ${{!cancelled()}}
         with:
           name: "Test and reports"
-          path: |
-            ${{ env.PYTEST_REPORT_PATH }}
+          path: test-results/
           if-no-files-found: error
 
   publish-package-as-artifact:

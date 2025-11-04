@@ -1,7 +1,9 @@
 name: lab3_cicd
+
 on:
   push:
     branches: [main]
+
 jobs:
   test-and-package:
     runs-on: ubuntu-latest
@@ -9,22 +11,29 @@ jobs:
       PYTEST_REPORT_PATH: /tmp/pytest_report.html
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
       - name: "Install python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: "Install project dependencies"
         run: pip install -r requirements.txt
+
       - name: "Run tests and code coverage analysis"
-        run: pytest --html=${{ env.PYTEST_REPORT_PATH }} --self-contained-html
+        run: |
+          mkdir -p ${{ env.PYTEST_REPORT_PATH }}
+          pytest --html=${{ env.PYTEST_REPORT_PATH }} --self-contained-html
+
       - name: "Archive pytest reports"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{!cancelled()}}
         with:
           name: "Test and reports"
           path: |
             ${{ env.PYTEST_REPORT_PATH }}
+          if-no-files-found: error
 
   publish-package-as-artifact:
     needs: ["test-and-package"]
